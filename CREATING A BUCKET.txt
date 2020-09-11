@@ -1,0 +1,14 @@
+
+ Create a bucket using Cloud Shell
+
+
+Open Cloud Shell again.
+
+Use the gsutil command to create another bucket. 
+
+gsutil mb gs://bucket_qwiklabs-gcp-01-efe6ecb3eb81-2
+
+
+
+
+

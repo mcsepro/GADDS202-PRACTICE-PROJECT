@@ -1,0 +1,124 @@
+VPC Networking
+
+Objectives
+In this lab, you learn how to perform the following tasks:
+
+Explore the default VPC network
+Create an auto mode network with firewall rules
+Convert an auto mode network to a custom mode network
+Create custom mode VPC networks with firewall rules
+Create VM instances using Compute Engine
+Explore the connectivity for VM instances across VPC networks
+
+----STEPS--------
+STEP 1
+Create the privatenet network using the gcloud command line.
+
+In the Cloud Console, click Activate Cloud Shell (Cloud Shell).
+
+If prompted, click Continue.
+
+To create the privatenet network, run the following command:
+
+gcloud compute networks create privatenet --subnet-mode=custom
+
+To create the privatesubnet-us subnet, run the following command:
+
+gcloud compute networks subnets create privatesubnet-us --network=privatenet --region=us-central1 --range=172.16.0.0/24
+
+To create the privatesubnet-eu subnet, run the following command:
+
+gcloud compute networks subnets create privatesubnet-eu --network=privatenet --region=europe-west1 --range=172.20.0.0/20
+
+To list the available VPC networks, run the following command:
+
+gcloud compute networks list
+
+The output should look like this (do not copy; this is example output):
+
+NAME           SUBNET_MODE  BGP_ROUTING_MODE  IPV4_RANGE  GATEWAY_IPV4
+managementnet  CUSTOM       REGIONAL
+mynetwork      CUSTOM       REGIONAL
+privatenet     CUSTOM       REGIONAL
+
+To list the available VPC subnets (sorted by VPC network), run the following command:
+
+gcloud compute networks subnets list --sort-by=NETWORK
+
+The output should look like this (do not copy; this is example output):
+
+NAME                REGION                   NETWORK        RANGE
+managementsubnet-us us-central1              managementnet  10.130.0.0/20
+mynetwork           asia-northeast1          mynetwork      10.146.0.0/20
+mynetwork           us-west1                 mynetwork      10.138.0.0/20
+mynetwork           southamerica-east1       mynetwork      10.158.0.0/20
+mynetwork           europe-west4             mynetwork      10.164.0.0/20
+mynetwork           asia-east1               mynetwork      10.140.0.0/20
+mynetwork           europe-north1            mynetwork      10.166.0.0/20
+mynetwork           asia-southeast1          mynetwork      10.148.0.0/20
+mynetwork           us-east4                 mynetwork      10.150.0.0/20
+mynetwork           europe-west1             mynetwork      10.132.0.0/20
+mynetwork           europe-west2             mynetwork      10.154.0.0/20
+mynetwork           europe-west3             mynetwork      10.156.0.0/20
+mynetwork           australia-southeast1     mynetwork      10.152.0.0/20
+mynetwork           asia-south1              mynetwork      10.160.0.0/20
+mynetwork           us-east1                 mynetwork      10.142.0.0/20
+mynetwork           us-central1              mynetwork      10.128.0.0/20
+mynetwork           northamerica-northeast1  mynetwork      10.162.0.0/20
+privatesubnet-eu    europe-west1             privatenet     172.20.0.0/20
+privatesubnet-us    us-central1              privatenet     172.16.0.0/24
+
+STEP 2
+Create the firewall rules for privatenet
+
+Create the firewall rules for privatenet network using the gcloud command line.
+
+
+To create the privatenet-allow-icmp-ssh-rdp firewall rule, run the following command:
+
+gcloud compute firewall-rules create privatenet-allow-icmp-ssh-rdp --direction=INGRESS --priority=1000 --network=privatenet --action=ALLOW --rules=icmp,tcp:22,tcp:3389 --source-ranges=0.0.0.0/0
+
+The output should look like this (do not copy; this is example output):
+
+NAME                           NETWORK     DIRECTION  PRIORITY  ALLOW                 DENY
+privatenet-allow-icmp-ssh-rdp  privatenet  INGRESS    1000      icmp,tcp:22,tcp:3389
+
+To list all the firewall rules (sorted by VPC network), run the following command:
+
+gcloud compute firewall-rules list --sort-by=NETWORK
+
+The output should look like this (do not copy; this is example output):
+
+NAME                              NETWORK        DIRECTION  PRIORITY  ALLOW                        
+managementnet-allow-icmp-ssh-rdp  managementnet  INGRESS    1000      icmp,tcp:22,tcp:3389
+mynetwork-allow-icmp              mynetwork      INGRESS    1000      icmp
+mynetwork-allow-internal          mynetwork      INGRESS    65534     all                         
+mynetwork-allow-rdp               mynetwork      INGRESS    1000      tcp:3389
+mynetwork-allow-ssh               mynetwork      INGRESS    1000      tcp:22
+privatenet-allow-icmp-ssh-rdp     privatenet     INGRESS    1000      icmp,tcp:22,tcp:3389
+
+STEP #3
+Create the privatenet-us-vm instance
+Create the privatenet-us-vm instance using the gcloud command line.
+
+To create the privatenet-us-vm instance, run the following command:
+
+gcloud compute instances create privatenet-us-vm --zone=us-central1-c --machine-type=f1-micro --subnet=privatesubnet-us
+
+The output should look like this (do not copy; this is example output):
+
+NAME              ZONE           MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP    STATUS
+privatenet-us-vm  us-central1-c  f1-micro                   172.16.0.2   34.66.197.202  RUNNING
+
+To list all the VM instances (sorted by zone), run the following command:
+
+gcloud compute instances list --sort-by=ZONE
+
+The output should look like this (do not copy; this is example output):
+
+NAME                 ZONE            MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP    STATUS
+mynet-eu-vm          europe-west1-c  n1-standard-1              10.132.0.2   34.76.115.41   RUNNING
+managementnet-us-vm  us-central1-c   f1-micro                   10.130.0.2   35.239.68.123  RUNNING
+mynet-us-vm          us-central1-c   n1-standard-1              10.128.0.2   35.202.101.52  RUNNING
+privatenet-us-vm     us-central1-c   f1-micro                   172.16.0.2   34.66.197.202  RUNNING
+
